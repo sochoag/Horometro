@@ -8,6 +8,7 @@
 
 void setup()
 {
+  iniciarPuntero();
   Serial.begin(115200);
   Serial.println();
   pinMode(button, INPUT_PULLUP);
@@ -25,10 +26,13 @@ void loop()
 {
   double t = millis();
 
-  if (t - t1 > 5000)
+  if (t - t1 > 1000)
   {
     t1 = t;
-    Serial.println("Equipo: " + String(equipo) + "\tCodigo: " + String(codigo)); // put your main code here, to run repeatedly:
+    String buffH[1] = {"horo"};
+    String buffV[1] = {String(t)};
+    FSWrite("/data.json",buffH,buffV,1);
+    Serial.println("Equipo: " + String(valores[0]) + "\tCodigo: " + String(valores[1])+ "\tHorometro: " + buffV[0]); // put your main code here, to run repeatedly:
   }
 
   if (!WiFi.isConnected())
@@ -40,10 +44,4 @@ void loop()
   {
     resetAP();
   }
-}
-
-void saveConfigCallback()
-{
-  Serial.println("Should save config");
-  shouldSaveConfig = true;
 }

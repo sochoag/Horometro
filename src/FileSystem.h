@@ -5,8 +5,8 @@
 #ifndef FileSystem
 #define FileSystem
 // Funciones
-void FSRead(String);
-void FSWrite(String);
+void FSRead(String archivo, String header[], String values[], int sizeA);
+void FSWrite(String archivo, String header[], String values[], int sizeA);
 void setupFS();
 
 void setupFS() 
@@ -17,10 +17,10 @@ void setupFS()
   //Lectura archivo de configuración
   Serial.println("Configurando FS...");
   LittleFS.begin();
-  FSRead("config.json");
+  FSRead("/config.json", encabezados, valores, n);
 }
 
-void FSRead(String archivo)
+void FSRead(String archivo, String header[], String values[],int sizeA)
 {
     if (LittleFS.exists(archivo))
     {
@@ -29,20 +29,25 @@ void FSRead(String archivo)
       File configFile = LittleFS.open(archivo, "r");
       if (configFile)
       {
-        Serial.println("opened config file");
+        Serial.println("Archivo "+archivo+" abierto");
         size_t size = configFile.size();
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
         configFile.readBytes(buf.get(), size);
         DynamicJsonBuffer jsonBuffer;
         JsonObject& json = jsonBuffer.parseObject(buf.get());
+
         json.printTo(Serial);
 
         if (json.success())
         {
           Serial.println("\nParsed json");
-          strcpy(equipo, json["equipo"]);
-          strcpy(codigo, json["codigo"]);
+          for(int i=0; i<sizeA ; i++)
+          {
+            //String aux = json["sensor"].as<String>();
+            values[i] =  json[header[i]].as<String>();
+            Serial.println(header[i] + " ···· "+ values[i]);
+          }
         }
 
         else
@@ -54,23 +59,27 @@ void FSRead(String archivo)
     }
 }
 
-void FSWrite(String archivo)
+void FSWrite(String archivo, String header[], String values[],int sizeA)
 {
-    Serial.println("Guardando configuraciones");
+    // Serial.println(sizeA);
+    //Serial.println("Guardando configuraciones");
     DynamicJsonBuffer jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
-    json["equipo"] = equipo;
-    json["codigo"] = codigo;
-
+    for(int i=0; i<sizeA ; i++)
+    {
+      //Serial.println(header[i] + " ···· "+ values[i]);
+      json[header[i]] = values[i];
+    }
     File configFile = LittleFS.open(archivo, "w");
     if (!configFile)
     {
-      Serial.println("Error al guardar las configuraciones");
+      //Serial.println("Error al guardar las configuraciones");
     }
-
-    json.prettyPrintTo(Serial);
+    //Serial.println("Guardado en"+archivo);
+    //json.prettyPrintTo(Serial);
     json.printTo(configFile);
     configFile.close();
+    //Serial.println("Guardado en"+archivo);
 }
 
 #endif

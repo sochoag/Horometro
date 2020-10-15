@@ -15,10 +15,10 @@ void setupAP()
 {
 
     wm.setSaveConfigCallback(saveConfigCallback);
-    wm.setConfigPortalTimeout(30); // Tiempo para saltar AP en segundso
+    wm.setConfigPortalTimeout(30); // Tiempo para saltar AP en segundos
     // Custom Parameters
-    WiFiManagerParameter custom_equipo("eq", "Equipo", equipo, 7);
-    WiFiManagerParameter custom_codigo("code", "Codigo", codigo, 7);
+    WiFiManagerParameter custom_equipo("eq", "Equipo","", 7);
+    WiFiManagerParameter custom_codigo("code", "Codigo", "", 7);
     wm.addParameter(&custom_equipo);
     wm.addParameter(&custom_codigo);
     // Configuracion Access Point
@@ -35,13 +35,12 @@ void setupAP()
     //if you get here you have connected to the WiFi
     Serial.println("Conectado");
     //read updated parameters
-    strcpy(equipo, custom_equipo.getValue()); // Se aloja el valor introducido en el AP
-    strcpy(codigo, custom_codigo.getValue()); // Se aloja el valor introducido en el AP
-
     //save the custom parameters to FS
     if (shouldSaveConfig)
     {
-        FSWrite("/config.json");
+        valores[0] = custom_equipo.getValue(); // Se aloja el valor introducido en el AP
+        valores[1] = custom_codigo.getValue(); // Se aloja el valor introducido en el AP
+        FSWrite("/config.json", encabezados, valores, n);
         //end save
         shouldSaveConfig = false;
     }
@@ -58,6 +57,12 @@ void resetAP()
     Serial.println("Reiniciando");
     ESP.restart();
     delay(1000);
+}
+
+void saveConfigCallback()
+{
+  Serial.println("Should save config");
+  shouldSaveConfig = true;
 }
 
 void reconexion()
