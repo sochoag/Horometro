@@ -1,6 +1,7 @@
 #include <WiFiManager.h>
 #include <variables.h>
 #include <FileSystem.h>
+#include <horometro.h>
 // Variables de libreria
 bool shouldSaveConfig = false; //flag for saving data
 // Instancias
@@ -38,9 +39,9 @@ void setupAP()
     //save the custom parameters to FS
     if (shouldSaveConfig)
     {
-        valores[0] = custom_equipo.getValue(); // Se aloja el valor introducido en el AP
-        valores[1] = custom_codigo.getValue(); // Se aloja el valor introducido en el AP
-        FSWrite("/config.json", encabezados, valores, n);
+        valoresConfig[0] = custom_equipo.getValue(); // Se aloja el valor introducido en el AP
+        valoresConfig[1] = custom_codigo.getValue(); // Se aloja el valor introducido en el AP
+        FSWrite("/config.json", configuraciones, valoresConfig, n);
         //end save
         shouldSaveConfig = false;
     }
@@ -48,11 +49,13 @@ void setupAP()
 
 void resetAP()
 {
+    Serial.println("Limpiando Registro de Horometro");
+    resetHoro();
     Serial.println("Limpiando FS");
-    LittleFS.format();
+    //LittleFS.format();
     delay(1000);
     Serial.println("Limpiando Wifi Settings");
-    wm.resetSettings();
+    //wm.resetSettings();
     delay(1000);
     Serial.println("Reiniciando");
     ESP.restart();

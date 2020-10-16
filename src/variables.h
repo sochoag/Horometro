@@ -3,19 +3,12 @@
 
 // Variables
 double t1 = 0;
-char equipo[8];
-char codigo[8];
 
-String encabezados[] = {"equipo","codigo","horo","estado"};
-const int n=sizeof(encabezados)/sizeof(encabezados[0]);
-String valores[n];
-String *p[n];
+String configuraciones[] = {"equipo","codigo"};
+const int n=sizeof(configuraciones)/sizeof(configuraciones[0]);
+String valoresConfig[n];
 
-void iniciarPuntero()
-{
-    for (size_t i = 0; i < n; i++)
-    {
-        p[i]=&valores[i]; 
-    }
-}
+String horometro[] = {"Y","M","D","H","Min","S"};
+const int nH=sizeof(horometro)/sizeof(horometro[0]);
+String valoresHorometro[nH];
 #endif

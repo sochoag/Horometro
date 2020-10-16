@@ -17,7 +17,8 @@ void setupFS()
   //Lectura archivo de configuración
   Serial.println("Configurando FS...");
   LittleFS.begin();
-  FSRead("/config.json", encabezados, valores, n);
+  FSRead("/config.json", configuraciones, valoresConfig, n);
+  FSRead("/horometro.json", horometro,valoresHorometro, nH);
 }
 
 void FSRead(String archivo, String header[], String values[],int sizeA)
@@ -42,12 +43,14 @@ void FSRead(String archivo, String header[], String values[],int sizeA)
         if (json.success())
         {
           Serial.println("\nParsed json");
+          Serial.print("{");
           for(int i=0; i<sizeA ; i++)
           {
             //String aux = json["sensor"].as<String>();
             values[i] =  json[header[i]].as<String>();
-            Serial.println(header[i] + " ···· "+ values[i]);
+            Serial.print("\""+header[i] + "\":\"" + values[i]+"\",");
           }
+          Serial.println("}");
         }
 
         else
@@ -75,7 +78,7 @@ void FSWrite(String archivo, String header[], String values[],int sizeA)
     {
       //Serial.println("Error al guardar las configuraciones");
     }
-    //Serial.println("Guardado en"+archivo);
+    Serial.println("Guardado en"+archivo);
     //json.prettyPrintTo(Serial);
     json.printTo(configFile);
     configFile.close();
