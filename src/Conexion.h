@@ -17,6 +17,7 @@ void setupAP()
 
     wm.setSaveConfigCallback(saveConfigCallback);
     wm.setConfigPortalTimeout(30); // Tiempo para saltar AP en segundos
+    wm.setDebugOutput(false);
     // Custom Parameters
     WiFiManagerParameter custom_equipo("eq", "Equipo","", 7);
     WiFiManagerParameter custom_codigo("code", "Codigo", "", 7);
@@ -71,9 +72,9 @@ void saveConfigCallback()
 void reconexion()
 {
     int c_rec = 0;
-    Serial.println("Desconexion");
+    Serial.println("Conexion");
     WiFi.reconnect();
-    Serial.print("Tratando de reconectar: ");
+    Serial.print("Tratando de conectar: ");
     while (!WiFi.isConnected())
     {
       Serial.print("■");
@@ -81,9 +82,13 @@ void reconexion()
       c_rec++;
       if (c_rec > 20)
       {
-        Serial.println("Imposible reconectar 🡢 REINICIANDO");
-        ESP.restart();
+        Serial.println("■");
+        FSWrite("/horometro.json",horometro,valoresHorometro,nH);
+        Serial.println("Guardado valor de horometro");
         delay(1000);
+        Serial.println("Imposible reconectar 🡢 REINICIANDO");
+        delay(1000);
+        ESP.restart();
       }
     }
     Serial.println("");

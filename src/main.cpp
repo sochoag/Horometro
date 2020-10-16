@@ -4,11 +4,14 @@
 #include <Conexion.h>
 #include <horometro.h>
 #include <variables.h>
+#include <BOD.h>
 
 #define button 0
 
 void setup()
 {
+  BODinit();
+
   Serial.begin(115200);
   if (! rtc.begin())
   {
@@ -21,44 +24,27 @@ void setup()
   
   setupFS();
   setHoro(valoresHorometro);
-  //setupAP();
-
+  setupAP();
   Serial.println("IP Local");
   Serial.println(WiFi.localIP());
   Serial.println(WiFi.gatewayIP());
   Serial.println(WiFi.subnetMask());
+  Serial.println(readHoro());
 }
 
 void loop()
 {
-  double t = millis();
-  if (t - t1 > 1000)
+  BODWatch();
+  if (changeHoro())
   {
-    DateTime now = rtc.now();
-
-    t1 = t;
-    
-    valoresHorometro[0] = now.year();
-    valoresHorometro[1] = now.month();
-    valoresHorometro[2] = now.day();
-    valoresHorometro[3] = now.hour();
-    valoresHorometro[4] = now.minute();
-    valoresHorometro[5] = now.second();
-    TimeSpan ts1 = now - DateTime(0,0,0,0,0,0);
-
-    uint32_t minutos = ts1.totalseconds()/3600;
-    uint8_t segundos = ts1.minutes();
-    FSWrite("/horometro.json",horometro,valoresHorometro,nH);
-
-    Serial.print("Equipo: " + String(valoresConfig[0]) + "\tCodigo: " + String(valoresConfig[1])+ "\tHorometro:"); // put your main code here, to run repeatedly:
-    Serial.println(String(minutos)+":"+String(segundos));
-    //Serial.println("" + String(now.hour()) + ":"+ now.minute()+":"+ now.second());
+    WiFi.forceSleepWake();
+    WiFi.mode(WIFI_STA);
+    while(!wm.autoConnect())
+    delay(500);
+    Serial.println("Equipo: " + String(valoresConfig[0]) + "\tCodigo: " + String(valoresConfig[1]) + "\tHorometro:" + readHoro());
+    WiFi.forceSleepBegin();
   }
 
-  /*if (!WiFi.isConnected())
-  {
-    reconexion();
-  }*/
 
   if (!digitalRead(0))
   {

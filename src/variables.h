@@ -11,4 +11,10 @@ String valoresConfig[n];
 String horometro[] = {"Y","M","D","H","Min","S"};
 const int nH=sizeof(horometro)/sizeof(horometro[0]);
 String valoresHorometro[nH];
+
+
+// Variables BOD
+float volt_ini=0;
+bool banBOD = true;
+
 #endif

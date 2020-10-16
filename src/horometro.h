@@ -6,6 +6,9 @@
 #define HR
 RTC_DS3231 rtc;
 
+DateTime now;
+DateTime last = DateTime(0,0,0,0,0,0);
+
 void setHoro(String fecha[6])
 {
     int Y = fecha[0].toInt();
@@ -16,10 +19,42 @@ void setHoro(String fecha[6])
     int S = fecha[5].toInt();
     Serial.println("Fecha seteada:" + String(Y) + ":" + String(M) + ":" + String(D) + ":" + String(H) + ":" + String(Min) + ":" + String(S));
     rtc.adjust(DateTime(Y,M,D,H,Min,S));
+    now = rtc.now();
 }
 void resetHoro()
 {
     String aux[]= {"0","0","0","0","0","0"};
     FSWrite("/horometro.json", horometro, aux, nH);
 }
+
+String readHoro()
+{   
+    TimeSpan ts1 = now - DateTime(0,0,0,0,0,0);
+
+    uint32_t minutos = ts1.totalseconds()/3600;
+    uint8_t segundos = ts1.minutes();
+    String lectura = String(minutos)+":"+String(segundos);
+    return lectura;
+}
+
+boolean changeHoro()
+{
+    now = rtc.now();
+
+    valoresHorometro[0] = now.year();
+    valoresHorometro[1] = now.month();
+    valoresHorometro[2] = now.day();
+    valoresHorometro[3] = now.hour();
+    valoresHorometro[4] = now.minute();
+    valoresHorometro[5] = now.second();
+    
+    if(now.minute() != last.minute())
+    {
+        last = now;
+        return true;
+    }
+    return false;
+}
+
+
 #endif

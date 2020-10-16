@@ -78,7 +78,7 @@ void FSWrite(String archivo, String header[], String values[],int sizeA)
     {
       //Serial.println("Error al guardar las configuraciones");
     }
-    Serial.println("Guardado en"+archivo);
+    //Serial.println("Guardado en"+archivo);
     //json.prettyPrintTo(Serial);
     json.printTo(configFile);
     configFile.close();
