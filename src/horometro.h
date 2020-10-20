@@ -57,7 +57,7 @@ boolean changeHoro()
     valoresHorometro[4] = now.minute();
     valoresHorometro[5] = now.second();
     
-    if(now.second() != last.second())
+    if(now.minute() != last.minute())
     {
         last = now;
         return true;

@@ -19,6 +19,7 @@ void setupFS()
   LittleFS.begin();
   FSRead("/config.json", configuraciones, valoresConfig, n);
   FSRead("/horometro.json", horometro,valoresHorometro, nH);
+  FSRead("/prueba.json",prueba,valoresPrueba,nP);
 }
 
 void FSRead(String archivo, String header[], String values[],int sizeA)
