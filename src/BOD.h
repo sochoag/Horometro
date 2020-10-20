@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <FileSystem.h>
 #include <variables.h>
+#include <OLED.h>
 
 #ifndef BOD
 #define BOD
@@ -22,7 +23,7 @@ void BODWatch()
     if(banBOD)
     {
       FSWrite("/horometro.json",horometro,valoresHorometro,nH);
-      Serial.println("Guardado exitoso");
+      escribir_oled("Guardado");
       banBOD = !banBOD;
     }
   }

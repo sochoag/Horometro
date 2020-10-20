@@ -4,10 +4,19 @@
 
 #ifndef HR
 #define HR
+
 RTC_DS3231 rtc;
 
 DateTime now;
 DateTime last = DateTime(0,0,0,0,0,0);
+
+void rtcSetup()
+{
+    while(!rtc.begin())
+    {
+        Serial.println("Iniciando RTC");
+    }
+}
 
 void setHoro(String fecha[6])
 {
@@ -31,9 +40,9 @@ String readHoro()
 {   
     TimeSpan ts1 = now - DateTime(0,0,0,0,0,0);
 
-    uint32_t minutos = ts1.totalseconds()/3600;
-    uint8_t segundos = ts1.minutes();
-    String lectura = String(minutos)+":"+String(segundos);
+    uint32_t horas = ts1.totalseconds()/3600;
+    uint8_t minutos = ts1.minutes();
+    String lectura = String(horas)+":"+String(minutos);
     return lectura;
 }
 
@@ -48,7 +57,7 @@ boolean changeHoro()
     valoresHorometro[4] = now.minute();
     valoresHorometro[5] = now.second();
     
-    if(now.minute() != last.minute())
+    if(now.second() != last.second())
     {
         last = now;
         return true;
