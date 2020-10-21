@@ -19,35 +19,33 @@ void setup()
   pinMode(button, INPUT_PULLUP);
   
   setupFS();
-  setHoro(valoresHorometro);
   setupAP();
   setupMQTT();
   setupOled();
-
-  Serial.println("IP Local");
-  Serial.println(WiFi.localIP());
-  Serial.println(WiFi.gatewayIP());
-  Serial.println(WiFi.subnetMask());
   String msghoro = readHoro();
-  Serial.println(msghoro);
   escribir_oled(msghoro);
+  Serial.println("════════════════════════════════════════════════════════════");
+  Serial.println("Sistema Listo");
+  Serial.println("════════════════════════════════════════════════════════════");
 }
 
 void loop()
 {
   //BODWatch();
   MQTTWatch();
-  if (changeHoro())
+  if (changeHoro() && !banderaMQTT)
   {
     String msgHoro = readHoro();
     Serial.println("Equipo: " + String(valoresConfig[4]) + "\tCodigo: " + String(valoresConfig[5]) + "\tHorometro:" + msgHoro);
     escribir_oled(msgHoro);
     publishString("lastReg",msgHoro);
+    publishJson("vars",horometro,valoresHorometro,nH);
   }
 
 
   if (!digitalRead(0))
   {
+    limpiarVariables();
     resetAP();
   }
 }

@@ -10,11 +10,13 @@ RTC_DS3231 rtc;
 DateTime now;
 DateTime last = DateTime(0,0,0,0,0,0);
 
+String readHoro();
+
 void rtcSetup()
 {
     while(!rtc.begin())
     {
-        Serial.println("Iniciando RTC");
+        ESP.restart();
     }
 }
 
@@ -26,9 +28,10 @@ void setHoro(String fecha[6])
     int H = fecha[3].toInt();
     int Min = fecha[4].toInt();
     int S = fecha[5].toInt();
-    Serial.println("Fecha seteada:" + String(Y) + ":" + String(M) + ":" + String(D) + ":" + String(H) + ":" + String(Min) + ":" + String(S));
+    //Serial.println("Fecha seteada:" + String(Y) + ":" + String(M) + ":" + String(D) + ":" + String(H) + ":" + String(Min) + ":" + String(S));
     rtc.adjust(DateTime(Y,M,D,H,Min,S));
     now = rtc.now();
+    Serial.println("Horometro: " + readHoro());
 }
 void resetHoro()
 {

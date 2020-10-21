@@ -15,11 +15,14 @@ void setupFS()
   //LittleFS.format();
 
   //Lectura archivo de configuración
+  Serial.println("════════════════════════════════════════════════════════════");
   Serial.println("Configurando FS...");
   LittleFS.begin();
   FSRead("/config.json", configuraciones, valoresConfig, n);
-  FSRead("/horometro.json", horometro,valoresHorometro, nH);
-  FSRead("/prueba.json",prueba,valoresPrueba,nP);
+  Serial.println("FS configurado");
+  Serial.println("════════════════════════════════════════════════════════════");
+  //FSRead("/horometro.json", horometro,valoresHorometro, nH);
+  //FSRead("/prueba.json",prueba,valoresPrueba,nP);
 }
 
 void FSRead(String archivo, String header[], String values[],int sizeA)
@@ -36,22 +39,20 @@ void FSRead(String archivo, String header[], String values[],int sizeA)
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
         configFile.readBytes(buf.get(), size);
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject& json = jsonBuffer.parseObject(buf.get());
 
-        json.printTo(Serial);
+        DynamicJsonDocument doc(1024);
+        DeserializationError error = deserializeJson(doc, buf.get());
 
-        if (json.success())
+        serializeJsonPretty(doc, Serial);
+        Serial.println("");
+
+        if (!error)
         {
-          Serial.println("\nParsed json");
-          Serial.print("{");
           for(int i=0; i<sizeA ; i++)
           {
             //String aux = json["sensor"].as<String>();
-            values[i] =  json[header[i]].as<String>();
-            Serial.print("\""+header[i] + "\":\"" + values[i]+"\",");
+            values[i] =  doc[header[i]].as<String>();
           }
-          Serial.println("}");
         }
 
         else
@@ -67,13 +68,14 @@ void FSWrite(String archivo, String header[], String values[],int sizeA)
 {
     // Serial.println(sizeA);
     //Serial.println("Guardando configuraciones");
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
+    DynamicJsonDocument doc(1024);
+
     for(int i=0; i<sizeA ; i++)
     {
       //Serial.println(header[i] + " ···· "+ values[i]);
-      json[header[i]] = values[i];
+      doc[header[i]] = values[i];
     }
+
     File configFile = LittleFS.open(archivo, "w");
     if (!configFile)
     {
@@ -81,7 +83,9 @@ void FSWrite(String archivo, String header[], String values[],int sizeA)
     }
     //Serial.println("Guardado en"+archivo);
     //json.prettyPrintTo(Serial);
-    json.printTo(configFile);
+    serializeJson(doc, configFile);
+    serializeJsonPretty(doc, Serial);
+    Serial.println("");
     configFile.close();
     //Serial.println("Guardado en"+archivo);
 }
