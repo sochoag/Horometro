@@ -13,7 +13,8 @@
 void setup()
 {
   Serial.begin(115200);
-  BODinit();
+  //BODinit();
+  setupOled();
   rtcSetup(); 
   Serial.println();
   pinMode(button, INPUT_PULLDOWN_16);
@@ -21,10 +22,11 @@ void setup()
   setupFS();
   setupAP();
   setupMQTT();
-  setupOled();
   String msghoro = readHoro();
-  escribir_oled(msghoro);
+  escribir_oled(msghoro,14);
   Serial.println("════════════════════════════════════════════════════════════");
+  escribir_oled("Sistema Listo",10);
+  delay(1000);
   Serial.println("Sistema Listo");
   Serial.println("════════════════════════════════════════════════════════════");
 }
@@ -37,7 +39,7 @@ void loop()
   {
     String msgHoro = readHoro();
     Serial.println("Equipo: " + String(valoresConfig[4]) + "\tCodigo: " + String(valoresConfig[5]) + "\tHorometro:" + msgHoro);
-    escribir_oled(msgHoro);
+    escribir_oled(msgHoro,14);
     publishString("lastReg",msgHoro);
     publishJson("vars",horometro,valoresHorometro,nH);
   }

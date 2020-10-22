@@ -23,7 +23,7 @@ void BODWatch()
     if(banBOD)
     {
       FSWrite("/horometro.json",horometro,valoresHorometro,nH);
-      escribir_oled("Guardado");
+      escribir_oled("Guardado",14);
       banBOD = !banBOD;
     }
   }

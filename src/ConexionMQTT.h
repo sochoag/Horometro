@@ -29,15 +29,19 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
         Serial.println("════════════════════════════════════════════════════════════");
         Serial.println("Recopilando variables desde el Servidor MQTT...");
+        //escribir_oled("Recopilando Variables",10);
         Serial.println("────────────────────────────────────────────────────────────");
         recibirJson(payload, length, horometro, valoresHorometro, nH);
         Serial.println("────────────────────────────────────────────────────────────");
         Serial.println("Variables recuperadas");
+        //escribir_oled("Variables recuperadas",10);
         Serial.println("════════════════════════════════════════════════════════════");
         Serial.println("════════════════════════════════════════════════════════════");
         Serial.println("Configurando horometro...");
+        //escribir_oled("Configurando horometro",10);
         setHoro(valoresHorometro);
         Serial.println("Horometro configurado");
+        //escribir_oled("Horometro configurado",10);
         Serial.println("════════════════════════════════════════════════════════════");
         clientmqtt.unsubscribe("vars");
         banderaMQTT = false;
@@ -50,6 +54,7 @@ void setupMQTT()
 {
     Serial.println("════════════════════════════════════════════════════════════");
     Serial.println("Configurando Servidor MQTT...");
+    //escribir_oled("Configurando MQTT",10);
     clientmqtt.setServer(valoresConfig[0].c_str(), valoresConfig[1].toInt());
     //clientmqtt.setKeepAlive(30);
     clientmqtt.setCallback(callback);
@@ -58,6 +63,7 @@ void setupMQTT()
         reconnectMQTT();
     }
     Serial.println("Servido MQTT configurado");
+    //escribir_oled("MQTT Configurado",10);
     Serial.println("────────────────────────────────────────────────────────────");
     Serial.println("Servidor MQTT: " + valoresConfig[0] + " Puerto MQTT: " + valoresConfig[1]);
     Serial.println("════════════════════════════════════════════════════════════");
@@ -76,9 +82,11 @@ void MQTTWatch()
 void reconnectMQTT()
 {
     int c_rec = 0;
+    int c_cred = 0;
     while (!clientmqtt.connected())
     {
         Serial.println("Intentando conexión Mqtt...");
+        //escribir_oled("Conectando MQTT",10);
         // Creamos un cliente ID
         String clientId = "HR01_";
         clientId += String(random(0xffff), HEX);
@@ -87,6 +95,7 @@ void reconnectMQTT()
         if (clientmqtt.connect(clientId.c_str(), valoresConfig[2].c_str(), valoresConfig[3].c_str()))
         {
             Serial.println("Conectado!");
+            //escribir_oled("Conectado",10);
             Serial.println("────────────────────────────────────────────────────────────");
             // Nos suscribimos
             if (banderaMQTT)
@@ -99,11 +108,17 @@ void reconnectMQTT()
             Serial.println("Error: " + String(clientmqtt.state()));
             delay(500);
             if ((clientmqtt.state() == 4 || clientmqtt.state() == 5) && (banderaMQTT))
-            {
-                wm.resetSettings();
-                Serial.println("Por favor revise las credenciales MQTT");
-                delay(3000);
-                ESP.restart();
+            {   
+                c_cred++;
+                if(c_cred>20)
+                {
+                    wm.resetSettings();
+                    Serial.println("Por favor revise las credenciales MQTT");
+                    escribir_oled("Revise Credenciales",10);
+                    delay(1000);
+                    ESP.restart();
+                }
+                delay(500);
             }
             else
             {
@@ -114,6 +129,7 @@ void reconnectMQTT()
                     // FSWrite("/horometro.json", horometro, valoresHorometro, nH);
                     delay(1000);
                     Serial.println("Imposible reconectar a MQTT🡢 REINICIANDO");
+                    //escribir_oled("Red Caida - Reinicio",10);
                     delay(1000);
                     ESP.restart();
                 }

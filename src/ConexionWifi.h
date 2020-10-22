@@ -20,6 +20,7 @@ void setupAP()
 {
   Serial.println("════════════════════════════════════════════════════════════");
   Serial.println("Configurando Wifi...");
+  escribir_oled("Configurando Wifi...",10);
   wm.setAPCallback(configModeCallback);
   wm.setSaveConfigCallback(saveConfigCallback);
   wm.setConfigPortalTimeout(15); // Tiempo para saltar AP en segundos
@@ -32,8 +33,8 @@ void setupAP()
   WiFiManagerParameter custom_mqtt_password("MQTT Password", "Pass MQTT", "", 30, "type= password");
 
   // Custon Parametros
-  WiFiManagerParameter custom_equipo("eq", "Equipo", "", 7);
-  WiFiManagerParameter custom_codigo("code", "Codigo", "", 7);
+  WiFiManagerParameter custom_equipo("eq", "Equipo", "", 30);
+  WiFiManagerParameter custom_codigo("code", "Codigo", "", 30);
 
   wm.addParameter(&custom_mqtt_server);
   wm.addParameter(&custom_mqtt_port);
@@ -51,6 +52,7 @@ void setupAP()
     delay(5000);
   }
   Serial.println("Wifi Configurado");
+  escribir_oled("Wifi Configurado",10);
   Serial.println("────────────────────────────────────────────────────────────");
   Serial.println("Conectado a:" + WiFi.SSID());
   Serial.println("IP Local");
@@ -79,6 +81,7 @@ void configModeCallback(WiFiManager *myWiFiManager)
 {
   Serial.println("────────────────────────────────────────────────────────────");
   Serial.println("Por favor ingrese en el AP...");
+  escribir_oled("Configure AP",10);
   Serial.println("────────────────────────────────────────────────────────────");
 }
 
@@ -86,19 +89,24 @@ void resetAP()
 {
   Serial.println("════════════════════════════════════════════════════════════");
   Serial.println("Reseteando");
+  escribir_oled("Reseteando",10);
   Serial.println("────────────────────────────────────────────────────────────");
   Serial.println("Limpiando Registro de Horometro");
+  escribir_oled("Limpiando Registro",10);
   resetHoro();
   Serial.println("────────────────────────────────────────────────────────────");
   Serial.println("Limpiando FS");
+  escribir_oled("Limpiando FS",10);
   LittleFS.format();
   Serial.println("────────────────────────────────────────────────────────────");
   delay(1000);
   Serial.println("Limpiando Wifi Settings");
+  escribir_oled("Limpiando Wifi Settings",10);
   wm.resetSettings();
   Serial.println("────────────────────────────────────────────────────────────");
   delay(1000);
   Serial.println("Reiniciando Dispositivo");
+  escribir_oled("Reiniciando Dispositivo",10);
   Serial.println("════════════════════════════════════════════════════════════");
   delay(3000);
   ESP.restart();

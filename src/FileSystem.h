@@ -1,6 +1,7 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <variables.h>
+#include <OLED.h>
 
 #ifndef FileSystem
 #define FileSystem
@@ -16,9 +17,11 @@ void setupFS()
 
   //Lectura archivo de configuración
   Serial.println("════════════════════════════════════════════════════════════");
+  escribir_oled("Configurando FS...",10);
   Serial.println("Configurando FS...");
   LittleFS.begin();
   FSRead("/config.json", configuraciones, valoresConfig, n);
+  escribir_oled("FS configurado",10);
   Serial.println("FS configurado");
   Serial.println("════════════════════════════════════════════════════════════");
   //FSRead("/horometro.json", horometro,valoresHorometro, nH);
