@@ -75,9 +75,9 @@ void MQTTWatch()
 
 void reconnectMQTT()
 {
+    int c_rec = 0;
     while (!clientmqtt.connected())
     {
-        int c_rec = 0;
         Serial.println("Intentando conexión Mqtt...");
         // Creamos un cliente ID
         String clientId = "HR01_";
@@ -96,7 +96,9 @@ void reconnectMQTT()
         }
         else
         {
-            if (clientmqtt.state() == 4 || clientmqtt.state() == 5)
+            Serial.println("Error: " + String(clientmqtt.state()));
+            delay(500);
+            if ((clientmqtt.state() == 4 || clientmqtt.state() == 5) && (banderaMQTT))
             {
                 wm.resetSettings();
                 Serial.println("Por favor revise las credenciales MQTT");
@@ -106,10 +108,10 @@ void reconnectMQTT()
             else
             {
                 c_rec++;
-                if (c_rec > 10)
+                if (c_rec > 20)
                 {
                     Serial.println("■");
-                    FSWrite("/horometro.json", horometro, valoresHorometro, nH);
+                    // FSWrite("/horometro.json", horometro, valoresHorometro, nH);
                     delay(1000);
                     Serial.println("Imposible reconectar a MQTT🡢 REINICIANDO");
                     delay(1000);
@@ -130,7 +132,8 @@ void publishString(String topic, String to_send)
 
 void publishJson(String topic, String header[], String values[], int sizeA)
 {
-    DynamicJsonDocument doc(1024);
+    const size_t capacity = JSON_OBJECT_SIZE(6)+40;
+    DynamicJsonDocument doc(capacity);
     for (int i = 0; i < sizeA; i++)
     {
         //Serial.println(header[i] + " ···· "+ values[i]);
@@ -143,7 +146,8 @@ void publishJson(String topic, String header[], String values[], int sizeA)
 
 void recibirJson(byte *payload, unsigned int length, String header[], String values[], int sizeA)
 {
-    StaticJsonDocument<256> doc;
+    const size_t capacity = JSON_OBJECT_SIZE(6)+40;
+    DynamicJsonDocument doc(capacity);
     deserializeJson(doc, payload, length);
     for (int i = 0; i < sizeA; i++)
     {
@@ -160,6 +164,7 @@ void limpiarVariables()
     String aux[] = {"0", "0", "0", "0", "0", "0"};
     publishJson("vars", horometro, aux, nH);
     Serial.println("");
+    delay(100);
 }
 
 void recibirVars()

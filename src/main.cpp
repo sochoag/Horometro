@@ -8,7 +8,7 @@
 #include <BOD.h>
 #include <OLED.h>
 
-#define button 0
+#define button D0
 
 void setup()
 {
@@ -16,7 +16,7 @@ void setup()
   BODinit();
   rtcSetup(); 
   Serial.println();
-  pinMode(button, INPUT_PULLUP);
+  pinMode(button, INPUT_PULLDOWN_16);
   
   setupFS();
   setupAP();
@@ -43,7 +43,7 @@ void loop()
   }
 
 
-  if (!digitalRead(0))
+  if (digitalRead(button))
   {
     limpiarVariables();
     resetAP();

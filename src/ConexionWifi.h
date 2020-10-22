@@ -14,7 +14,7 @@ void setupAP();
 void saveConfigCallback();
 void configModeCallback(WiFiManager *myWiFiManager);
 void resetAP();
-void reconexion();
+//void reconexion();
 
 void setupAP()
 {
@@ -22,7 +22,7 @@ void setupAP()
   Serial.println("Configurando Wifi...");
   wm.setAPCallback(configModeCallback);
   wm.setSaveConfigCallback(saveConfigCallback);
-  wm.setConfigPortalTimeout(30); // Tiempo para saltar AP en segundos
+  wm.setConfigPortalTimeout(15); // Tiempo para saltar AP en segundos
   wm.setDebugOutput(false);
 
   // MQTT Server
@@ -111,7 +111,7 @@ void saveConfigCallback()
   shouldSaveConfig = true;
 }
 
-void reconexion()
+/*void reconexion()
 {
   int c_rec = 0;
   Serial.println("Conexion");
@@ -134,6 +134,6 @@ void reconexion()
     }
   }
   Serial.println("");
-}
+}*/
 
 #endif
