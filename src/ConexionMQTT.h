@@ -1,7 +1,7 @@
 #include <ConexionWifi.h>
 #include <variables.h>
 #include <PubSubClient.h>
-#include <horometro.h>
+
 
 #ifndef connectMQTT
 #define connectMQTT
@@ -27,22 +27,24 @@ void callback(char *topic, byte *payload, unsigned int length)
 
     if (strcmp(topic, "vars") == 0)
     {
-        Serial.println("════════════════════════════════════════════════════════════");
-        Serial.println("Recopilando variables desde el Servidor MQTT...");
-        //escribir_oled("Recopilando Variables",10);
-        Serial.println("────────────────────────────────────────────────────────────");
-        recibirJson(payload, length, horometro, valoresHorometro, nH);
-        Serial.println("────────────────────────────────────────────────────────────");
-        Serial.println("Variables recuperadas");
-        //escribir_oled("Variables recuperadas",10);
-        Serial.println("════════════════════════════════════════════════════════════");
-        Serial.println("════════════════════════════════════════════════════════════");
-        Serial.println("Configurando horometro...");
-        //escribir_oled("Configurando horometro",10);
-        setHoro(valoresHorometro);
-        Serial.println("Horometro configurado");
-        //escribir_oled("Horometro configurado",10);
-        Serial.println("════════════════════════════════════════════════════════════");
+        if (!banderaBackup)
+        {
+            Serial.println("════════════════════════════════════════════════════════════");
+            Serial.println("Recopilando variables desde el Servidor MQTT...");
+            //escribir_oled("Recopilando Variables",10);
+            Serial.println("────────────────────────────────────────────────────────────");
+            recibirJson(payload, length, horometro, valoresHorometro, nH);
+            Serial.println("────────────────────────────────────────────────────────────");
+            Serial.println("Variables recuperadas");
+            //escribir_oled("Variables recuperadas",10);
+            Serial.println("════════════════════════════════════════════════════════════");
+            Serial.println("════════════════════════════════════════════════════════════");
+            Serial.println("Configurando horometro...");
+            //escribir_oled("Configurando horometro",10);
+            Serial.println("Horometro configurado");
+            //escribir_oled("Horometro configurado",10);
+            Serial.println("════════════════════════════════════════════════════════════");
+        }
         clientmqtt.unsubscribe("vars");
         banderaMQTT = false;
     }
@@ -63,7 +65,7 @@ void setupMQTT()
         reconnectMQTT();
     }
     Serial.println("Servido MQTT configurado");
-    //escribir_oled("MQTT Configurado",10);
+    escribir_oled("MQTT Configurado", 10);
     Serial.println("────────────────────────────────────────────────────────────");
     Serial.println("Servidor MQTT: " + valoresConfig[0] + " Puerto MQTT: " + valoresConfig[1]);
     Serial.println("════════════════════════════════════════════════════════════");
@@ -72,7 +74,7 @@ void setupMQTT()
 
 void MQTTWatch()
 {
-    if (!clientmqtt.connected())
+    if (!clientmqtt.connected() && !banderaSD)
     {
         reconnectMQTT();
     }
@@ -81,11 +83,22 @@ void MQTTWatch()
 
 void reconnectMQTT()
 {
+    while (!WiFi.isConnected() && !banderaSD)
+    {
+        wm.setConfigPortalTimeout(2);
+        if (!wm.autoConnect("Horometro", "12345678"))
+        {
+            Serial.println("No se pudo conectar");
+            escribir_oled("Wifi Caido - Usando SD", 10);
+            banderaSD = true;
+        }
+    }
     int c_rec = 0;
     int c_cred = 0;
-    while (!clientmqtt.connected())
+    Serial.println("Intentando conexión Mqtt...");
+    while (!clientmqtt.connected() && !banderaSD)
     {
-        Serial.println("Intentando conexión Mqtt...");
+        Serial.print("■");
         //escribir_oled("Conectando MQTT",10);
         // Creamos un cliente ID
         String clientId = "HR01_";
@@ -95,8 +108,9 @@ void reconnectMQTT()
         if (clientmqtt.connect(clientId.c_str(), valoresConfig[2].c_str(), valoresConfig[3].c_str()))
         {
             Serial.println("Conectado!");
-            //escribir_oled("Conectado",10);
+            escribir_oled("Conectado", 10);
             Serial.println("────────────────────────────────────────────────────────────");
+            banderaSD = false;
             // Nos suscribimos
             if (banderaMQTT)
             {
@@ -105,16 +119,16 @@ void reconnectMQTT()
         }
         else
         {
-            Serial.println("Error: " + String(clientmqtt.state()));
             delay(500);
             if ((clientmqtt.state() == 4 || clientmqtt.state() == 5) && (banderaMQTT))
-            {   
+            {
                 c_cred++;
-                if(c_cred>20)
+                if (c_cred > 20)
                 {
+                    Serial.println("Error: " + String(clientmqtt.state()));
                     wm.resetSettings();
                     Serial.println("Por favor revise las credenciales MQTT");
-                    escribir_oled("Revise Credenciales",10);
+                    escribir_oled("Revise Credenciales", 10);
                     delay(1000);
                     ESP.restart();
                 }
@@ -125,13 +139,14 @@ void reconnectMQTT()
                 c_rec++;
                 if (c_rec > 20)
                 {
+                    Serial.println("Error: " + String(clientmqtt.state()));
                     Serial.println("■");
                     // FSWrite("/horometro.json", horometro, valoresHorometro, nH);
                     delay(1000);
-                    Serial.println("Imposible reconectar a MQTT🡢 REINICIANDO");
-                    //escribir_oled("Red Caida - Reinicio",10);
+                    Serial.println("Imposible reconectar a MQTT 🡢 Usando SD");
+                    escribir_oled("MQTT Caido - Usando SD", 10);
                     delay(1000);
-                    ESP.restart();
+                    banderaSD = true;
                 }
             }
         }
@@ -148,7 +163,7 @@ void publishString(String topic, String to_send)
 
 void publishJson(String topic, String header[], String values[], int sizeA)
 {
-    const size_t capacity = JSON_OBJECT_SIZE(6)+40;
+    const size_t capacity = JSON_OBJECT_SIZE(6) + 40;
     DynamicJsonDocument doc(capacity);
     for (int i = 0; i < sizeA; i++)
     {
@@ -162,7 +177,7 @@ void publishJson(String topic, String header[], String values[], int sizeA)
 
 void recibirJson(byte *payload, unsigned int length, String header[], String values[], int sizeA)
 {
-    const size_t capacity = JSON_OBJECT_SIZE(6)+40;
+    const size_t capacity = JSON_OBJECT_SIZE(6) + 40;
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, payload, length);
     for (int i = 0; i < sizeA; i++)

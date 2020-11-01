@@ -1,5 +1,5 @@
 #include <variables.h>
-#include <FileSystem.h>
+#include <SDFileSystem.h>
 #include <RTClib.h>
 
 #ifndef HR
@@ -11,6 +11,7 @@ DateTime now;
 DateTime last = DateTime(0,0,0,0,0,0);
 
 String readHoro();
+void setHoro(String fecha[6]);
 
 void rtcSetup()
 {
@@ -18,6 +19,7 @@ void rtcSetup()
     {
         ESP.restart();
     }
+    setHoro(valoresHorometro);
 }
 
 void setHoro(String fecha[6])
@@ -36,7 +38,7 @@ void setHoro(String fecha[6])
 void resetHoro()
 {
     String aux[]= {"0","0","0","0","0","0"};
-    FSWrite("/horometro.json", horometro, aux, nH);
+    SDWrite("backup.log", horometro, aux, nH);
 }
 
 String readHoro()

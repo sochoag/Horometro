@@ -7,6 +7,7 @@
 #include <ConexionMQTT.h>
 #include <BOD.h>
 #include <OLED.h>
+#include <SDFileSystem.h>
 
 #define button 2
 
@@ -15,13 +16,17 @@ void setup()
   Serial.begin(115200);
   //BODinit();
   setupOled();
-  rtcSetup(); 
   Serial.println();
   pinMode(button, INPUT);
   
   setupFS();
+  setupSD();
+
   setupAP();
   setupMQTT();
+
+  rtcSetup(); 
+
   String msghoro = readHoro();
   escribir_oled(msghoro,14);
   Serial.println("════════════════════════════════════════════════════════════");
@@ -29,25 +34,46 @@ void setup()
   delay(1000);
   Serial.println("Sistema Listo");
   Serial.println("════════════════════════════════════════════════════════════");
+  if(SD.exists("backup.log"))
+  {
+    SD.remove("backup.log");
+  }
 }
 
 void loop()
 {
   //BODWatch();
   MQTTWatch();
-  if (changeHoro() && !banderaMQTT)
+  if (changeHoro())
   {
     String msgHoro = readHoro();
     Serial.println("Equipo: " + String(valoresConfig[4]) + "\tCodigo: " + String(valoresConfig[5]) + "\tHorometro:" + msgHoro);
     escribir_oled(msgHoro,14);
-    publishString("lastReg",msgHoro);
-    publishJson("vars",horometro,valoresHorometro,nH);
+    if(!banderaSD)
+    {
+      Serial.println("Publicando en MQTT");
+      publishString("lastReg",msgHoro);
+      publishJson("vars",horometro,valoresHorometro,nH);
+      if(SD.exists("backup.log"))
+      {
+        Serial.println("Eliminando archivo BackUp");
+        SD.remove("backup.log");
+      }
+    }
+    else
+    {
+      Serial.println("Guardando en SD");
+      SDWrite("backup.log",horometro, valoresHorometro, nH);
+      banderaSD = false;
+    }
   }
 
 
   if (!digitalRead(button))
   {
     limpiarVariables();
+    resetHoro();
     resetAP();
+    delay(500);
   }
 }
