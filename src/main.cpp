@@ -48,12 +48,12 @@ void loop()
   {
     String msgHoro = readHoro();
     Serial.println("Equipo: " + String(valoresConfig[4]) + "\tCodigo: " + String(valoresConfig[5]) + "\tHorometro:" + msgHoro);
-    escribir_oled(msgHoro,14);
     if(!banderaSD)
     {
       Serial.println("Publicando en MQTT");
       publishString("lastReg",msgHoro);
       publishJson("vars",horometro,valoresHorometro,nH);
+      estado = "ONLINE";
       if(SD.exists("backup.log"))
       {
         Serial.println("Eliminando archivo BackUp");
@@ -64,8 +64,10 @@ void loop()
     {
       Serial.println("Guardando en SD");
       SDWrite("backup.log",horometro, valoresHorometro, nH);
+      estado = "OFFLINE";
       banderaSD = false;
     }
+    escribir_oled(msgHoro,14);
   }
 
 

@@ -7,6 +7,7 @@
 #define connectWifi
 // Variables de libreria
 bool shouldSaveConfig = false; //flag for saving data
+int attempToSkip = 2;
 // Instancias
 WiFiManager wm;
 // Funciones
@@ -18,8 +19,11 @@ void resetAP();
 
 void setupAP()
 {
+  SDRead("attemps.log",attemps,valAttemps,nAtemps);
+  valAttemps[0] = String(valAttemps[0].toInt() + 1);
+  SDWrite("attemps.log",attemps,valAttemps,nAtemps);
   Serial.println("════════════════════════════════════════════════════════════");
-  Serial.println("Configurando Wifi...");
+  Serial.println("Configurando Wifi \t Intento:"+valAttemps[0]);
   escribir_oled("Configurando Wifi...",10);
   wm.setAPCallback(configModeCallback);
   wm.setSaveConfigCallback(saveConfigCallback);
@@ -43,37 +47,46 @@ void setupAP()
 
   wm.addParameter(&custom_equipo);
   wm.addParameter(&custom_codigo);
-  // Configuracion Access Point
-  if (!wm.autoConnect("Horometro", "12345678"))
+  if(valAttemps[0].toInt() <= attempToSkip)
   {
-    Serial.println("No se pudo conectar");
-    delay(3000);
-    ESP.restart();
-    delay(5000);
+    if (!wm.autoConnect("Horometro", "12345678"))
+    {
+      Serial.println("No se pudo conectar");
+      delay(3000);
+      ESP.restart();
+      delay(5000);
+    }
+    Serial.println("Wifi Configurado");
+    escribir_oled("Wifi Configurado",10);
+    Serial.println("────────────────────────────────────────────────────────────");
+    Serial.println("Conectado a:" + WiFi.SSID());
+    Serial.println("IP Local");
+    Serial.println(WiFi.localIP());
+    Serial.println(WiFi.gatewayIP());
+    Serial.println(WiFi.subnetMask());
+    Serial.println("════════════════════════════════════════════════════════════");
+
+    if (shouldSaveConfig)
+    {
+      valoresConfig[0] = custom_mqtt_server.getValue();
+      valoresConfig[1] = custom_mqtt_port.getValue();
+      valoresConfig[2] = custom_mqtt_user.getValue();
+      valoresConfig[3] = custom_mqtt_password.getValue();
+
+      valoresConfig[4] = custom_equipo.getValue(); // Se aloja el valor introducido en el AP
+      valoresConfig[5] = custom_codigo.getValue(); // Se aloja el valor introducido en el AP
+
+      FSWrite("/config.json", configuraciones, valoresConfig, n);
+      //end save
+      shouldSaveConfig = false;
+    }
+    banderaWifi = true;
   }
-  Serial.println("Wifi Configurado");
-  escribir_oled("Wifi Configurado",10);
-  Serial.println("────────────────────────────────────────────────────────────");
-  Serial.println("Conectado a:" + WiFi.SSID());
-  Serial.println("IP Local");
-  Serial.println(WiFi.localIP());
-  Serial.println(WiFi.gatewayIP());
-  Serial.println(WiFi.subnetMask());
-  Serial.println("════════════════════════════════════════════════════════════");
-
-  if (shouldSaveConfig)
+  else
   {
-    valoresConfig[0] = custom_mqtt_server.getValue();
-    valoresConfig[1] = custom_mqtt_port.getValue();
-    valoresConfig[2] = custom_mqtt_user.getValue();
-    valoresConfig[3] = custom_mqtt_password.getValue();
-
-    valoresConfig[4] = custom_equipo.getValue(); // Se aloja el valor introducido en el AP
-    valoresConfig[5] = custom_codigo.getValue(); // Se aloja el valor introducido en el AP
-
-    FSWrite("/config.json", configuraciones, valoresConfig, n);
-    //end save
-    shouldSaveConfig = false;
+    escribir_oled("Sistema Offline",10);
+    banderaWifi = false;
+    SD.remove("attemps.log");
   }
 }
 
@@ -118,30 +131,5 @@ void saveConfigCallback()
   Serial.println("Should save config");
   shouldSaveConfig = true;
 }
-
-/*void reconexion()
-{
-  int c_rec = 0;
-  Serial.println("Conexion");
-  WiFi.reconnect();
-  Serial.print("Tratando de conectar: ");
-  while (!WiFi.isConnected())
-  {
-    Serial.print("■");
-    delay(500);
-    c_rec++;
-    if (c_rec > 20)
-    {
-      Serial.println("■");
-      FSWrite("/horometro.json", horometro, valoresHorometro, nH);
-      Serial.println("Guardado valor de horometro");
-      delay(1000);
-      Serial.println("Imposible reconectar 🡢 REINICIANDO");
-      delay(1000);
-      ESP.restart();
-    }
-  }
-  Serial.println("");
-}*/
 
 #endif

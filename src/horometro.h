@@ -38,7 +38,7 @@ void setHoro(String fecha[6])
 void resetHoro()
 {
     String aux[]= {"0","0","0","0","0","0"};
-    SDWrite("backup.log", horometro, aux, nH);
+    SDWrite("backup.log",horometro, aux, nH);
 }
 
 String readHoro()

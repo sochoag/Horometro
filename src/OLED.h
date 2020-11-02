@@ -36,9 +36,13 @@ void escribir_oled(String variable,int font_size)
         u8g2.setFont(u8g2_font_fub14_tf);
     }
     int x = (u8g2.getDisplayWidth() - u8g2.getUTF8Width(variable.c_str()))/2;
-    int y = (u8g2.getDisplayHeight() + u8g2.getAscent())/2;
+    int y = (u8g2.getDisplayHeight() + u8g2.getAscent())/3;
     //Serial.println("Tamaño texto:"+String(y));
     u8g2.drawStr(x, y, variable.c_str());
+    u8g2.setFont(u8g2_font_6x10_tr);
+    int x2 = (u8g2.getDisplayWidth() - u8g2.getUTF8Width(estado.c_str()))/2;
+    int y2 = (((u8g2.getDisplayHeight() + (u8g2.getAscent()))*3)/4);
+    u8g2.drawStr(x2,y2,estado.c_str());
     u8g2.sendBuffer();
 }
 

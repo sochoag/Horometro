@@ -16,8 +16,7 @@ void setupSD()
     if (!SD.begin(chipSelect))
     {
         Serial.println("Iniciando SD");
-        while (1)
-            ;
+        while (1);
     }
 
     if (!SD.exists("backup.log"))
