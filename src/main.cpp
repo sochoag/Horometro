@@ -74,7 +74,10 @@ void loop()
   if (!digitalRead(button))
   {
     limpiarVariables();
-    resetHoro();
+    if(SD.exists("backup.log"))
+    {
+      SD.remove("backup.log");
+    }
     resetAP();
     delay(500);
   }

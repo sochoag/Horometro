@@ -196,7 +196,7 @@ void recibirJson(byte *payload, unsigned int length, String header[], String val
 
 void limpiarVariables()
 {
-    String aux[] = {"0", "0", "0", "0", "0", "0"};
+    String aux[] = {"2000", "1", "1", "0", "0", "0"};
     publishJson("vars", horometro, aux, nH);
     Serial.println("");
     delay(100);

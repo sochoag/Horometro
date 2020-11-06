@@ -14,7 +14,7 @@ String valAttemps[nAtemps];
 
 String horometro[] = {"Y","M","D","H","Min","S"};
 const int nH=sizeof(horometro)/sizeof(horometro[0]);
-String valoresHorometro[nH] = {"0","0","0","0","0","0"};
+String valoresHorometro[nH];
 
 String prueba[] = {"msg"};
 const int nP=sizeof(prueba)/sizeof(prueba[0]);

@@ -7,7 +7,7 @@
 #define connectWifi
 // Variables de libreria
 bool shouldSaveConfig = false; //flag for saving data
-int attempToSkip = 2;
+int attempToSkip = 3;
 // Instancias
 WiFiManager wm;
 // Funciones
@@ -81,6 +81,7 @@ void setupAP()
       shouldSaveConfig = false;
     }
     banderaWifi = true;
+    SD.remove("attemps.log");
   }
   else
   {
@@ -106,7 +107,6 @@ void resetAP()
   Serial.println("────────────────────────────────────────────────────────────");
   Serial.println("Limpiando Registro de Horometro");
   escribir_oled("Limpiando Registro",10);
-  resetHoro();
   Serial.println("────────────────────────────────────────────────────────────");
   Serial.println("Limpiando FS");
   escribir_oled("Limpiando FS",10);

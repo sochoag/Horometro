@@ -8,7 +8,7 @@
 RTC_DS3231 rtc;
 
 DateTime now;
-DateTime last = DateTime(0,0,0,0,0,0);
+DateTime last = DateTime(2000,1,1,0,0,0);
 
 String readHoro();
 void setHoro(String fecha[6]);
@@ -35,15 +35,10 @@ void setHoro(String fecha[6])
     now = rtc.now();
     Serial.println("Horometro: " + readHoro());
 }
-void resetHoro()
-{
-    String aux[]= {"0","0","0","0","0","0"};
-    SDWrite("backup.log",horometro, aux, nH);
-}
 
 String readHoro()
 {   
-    TimeSpan ts1 = now - DateTime(0,0,0,0,0,0);
+    TimeSpan ts1 = now - DateTime(2000,1,1,0,0,0);
 
     uint32_t horas = ts1.totalseconds()/3600;
     uint8_t minutos = ts1.minutes();
